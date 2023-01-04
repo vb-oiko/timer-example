@@ -19,12 +19,12 @@ import React from "react";
 class Timer extends React.Component {
   constructor(props) {
     super(props);
+    this.intervalId = null;
 
     this.plus = this.plus.bind(this);
 
     this.state = {
       timeLeft: props.initialValueSec,
-      intervalId: null,
       a: [],
       b: {
         c: "test",
@@ -40,25 +40,25 @@ class Timer extends React.Component {
     this.setState({ timeLeft: this.state.timeLeft - 1 });
   };
 
-  // componentDidMount() {
-  //   if (!this.state.intervalId) {
-  //     const intervalId = setInterval(() => {
-  //       console.warn(intervalId);
-  //       if (this.state.timeLeft < 0) {
-  //         clearInterval(this.state.intervalId);
-  //       }
-  //       this.setState({ timeLeft: this.state.timeLeft - 1 });
-  //     }, 1000);
+  // https://stackoverflow.com/questions/61254372/my-react-component-is-rendering-twice-because-of-strict-mode/61897567#61897567
+  // https://reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
 
-  //     this.setState({ intervalId });
-  //   }
-  //   // console.warn("Mounted");
-  // }
+  componentDidMount() {
+    if (!this.intervalId) {
+      this.intervalId = setInterval(() => {
+        if (this.state.timeLeft === 0) {
+          clearInterval(this.intervalId);
+          return;
+        }
+        this.setState({ timeLeft: this.state.timeLeft - 1 });
+      }, 1000);
+    }
+  }
 
-  // componentWillUnmount() {
-  //   clearInterval(this.state.intervalId);
-  //   // console.warn("Will unmount");
-  // }
+  componentWillUnmount() {
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+  }
 
   render() {
     const { name, initialValueSec } = this.props;
@@ -75,15 +75,6 @@ class Timer extends React.Component {
           role="button"
           onClick={() => {
             this.setState({ timeLeft: this.state.timeLeft - 1 });
-          }}
-        >
-          -
-        </span>
-        <span
-          role="button"
-          onClick={this.minus}
-          onMouseEnter={() => {
-            console.warn("Hover!!!");
           }}
         >
           -
